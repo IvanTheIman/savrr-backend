@@ -1,0 +1,67 @@
+{
+    "stores": {
+        "wally world": [
+            "1201 Stone St, Kilgore, TX 75662",
+            "5050 Troup Hwy, Tyler, TX 75707",
+            "450 S SE Loop 323, Tyler, TX 75702",
+            "6801 S Broadway Ave, Tyler, TX 75703",
+            "3820 State Hwy 64, Tyler, TX 75704",
+            "1900 E SE Loop 323, Tyler, TX 75703",
+            "2151 Frankston Hwy, Tyler, TX 75701",
+            "105 E Centennial Blvd, Lindale, TX 75771",
+            "5976 Old Jacksonville Hwy, Tyler, TX 75703",
+            "1311 S Jackson St, Jacksonville, TX 75766",
+            "135 NE Loop 564, Mineola, TX 75773",
+            "4006 Estes Pkwy, Longview, TX 75603",
+            "1102 US Hwy 271 N, Gilmer, TX 75644",
+            "2440 Gilmer Rd, Longview, TX 75604",
+            "515 E Loop 281, Longview, TX 75605",
+            "2121 US-79, Henderson, TX 75654",
+            "1405 E Tyler St, Athens, TX 75751"
+        ],
+        "bullseye": [
+            "7003 S Broadway Ave, Tyler, TX 75703",
+            "3092 N Eastman Rd Ste 100, Longview, TX 75605"
+        ],
+        "berkshires": [
+            "2734 E 5th St, Tyler, TX 75701",
+            "2020 S Roseland Blvd, Tyler, TX 75701",
+            "100 Rice Rd, Tyler, TX 75703",
+            "601 TX-110, Whitehouse, TX 75791",
+            "20100 Hwy 155 S, Flint, TX 75762",
+            "703 State Hwy 31 W, Chandler, TX 75758",
+            "213 U.S. Hwy 69 N, Bullard, TX 75757",
+            "521 S Main St, Lindale, TX 75771",
+            "1477 N Beulah St, Hawkins, TX 75765",
+            "506 W Duval St, Troup, TX 75789",
+            "200 W Henderson St, Overton, TX 75684",
+            "1300 E Broadway Ave, Gladewater, TX 75647",
+            "747 US-259 BUS, Kilgore, TX 75662",
+            "706 W Main St, Van, TX 75790",
+            "1224 N Pacific St, Mineola, TX 75773",
+            "502 E Goode St, Quitman, TX 75783",
+            "807 E Tyler St, Athens, TX 75751",
+            "415 W Royall Blvd, Malakoff, TX 75148"
+        ],
+        "ulbi": [
+            "2660 E Front St, Tyler, TX 75702",
+            "200 S SW Loop 323, Tyler, TX 75702",
+            "1725 W Loop 281, Longview, TX 75604"
+        ],
+        "great 1": [
+            "3828 Troup Hwy, Tyler, TX 75703",
+            "1105 E Gentry Pkwy, Tyler, TX 75702",
+            "113 N NW Loop 323, Tyler, TX 75702",
+            "921 S Jackson St, Jacksonville, TX 75766",
+            "2301 W Loop 281, Longview, TX 75604",
+            "1217 E Marshall Ave, Longview, TX 75601"
+        ],
+        "brussels": [
+            "4015 S Broadway Ave, Tyler, TX 75701",
+            "2547 Judson Rd, Longview, TX 75605"
+        ],
+        "robertsons": [
+            "3603 McCann Rd, Longview, TX 75605"
+        ] 
+    }
+}
