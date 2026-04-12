@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -86,7 +87,10 @@ WSGI_APPLICATION = 'grocery_backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'default': dj_database_url.parse(os.environ.get(
+        'postgresql://savrr_user:72CjNTmYTBTh2jqCI1gpRaSgzdZyw2Ht@dpg-d7bdrih5pdvs738pplbg-a.oregon-postgres.render.com/savrr'))
+    if os.environ.get('postgresql://savrr_user:72CjNTmYTBTh2jqCI1gpRaSgzdZyw2Ht@dpg-d7bdrih5pdvs738pplbg-a.oregon-postgres.render.com/savrr')
+    else {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'grocery_db',
         'USER': 'postgres',
