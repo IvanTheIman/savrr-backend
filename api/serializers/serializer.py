@@ -13,6 +13,7 @@ class PriceHistorySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     price = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -22,6 +23,10 @@ class ProductSerializer(serializers.ModelSerializer):
         prices = getattr(obj, 'latest_prices', [])
         return PriceHistorySerializer(prices, many = True).data
     
+    def get_image(self, obj):
+        if obj.image:
+            return  f"https://res.cloudinary.com/dkkbnt3ap/image/upload/{obj.image}"
+        return None   
 
 class UserLocationSerializer(serializers.ModelSerializer):
     class Meta:
