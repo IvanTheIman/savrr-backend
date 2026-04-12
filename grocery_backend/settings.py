@@ -26,7 +26,12 @@ SECRET_KEY = 'django-insecure-pinz)frvtm=w3be6fbh*c%k%%jdgqiuvr7iv3w3zy@*syefimh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.152.40.87', '10.0.2.2', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    '10.152.40.87', 
+    '10.0.2.2', 
+    'localhost', 
+    '127.0.0.1',
+    'savrr-backend.onrender.com']
 
 
 # Application definition
