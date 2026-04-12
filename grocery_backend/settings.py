@@ -87,9 +87,8 @@ WSGI_APPLICATION = 'grocery_backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.parse(os.environ.get(
-        'postgresql://savrr_user:72CjNTmYTBTh2jqCI1gpRaSgzdZyw2Ht@dpg-d7bdrih5pdvs738pplbg-a.oregon-postgres.render.com/savrr'))
-    if os.environ.get('postgresql://savrr_user:72CjNTmYTBTh2jqCI1gpRaSgzdZyw2Ht@dpg-d7bdrih5pdvs738pplbg-a.oregon-postgres.render.com/savrr')
+    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+    if os.environ.get('DATABASE_URL')
     else {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'grocery_db',
