@@ -2,6 +2,7 @@ from django.urls import include, path
 from django.contrib import admin
 
 from api.views.barcode import lookup_barcode
+from api.views.grocery_list import add_item, grocery_list_detail, grocery_lists, item_detail
 from .views.products import products_info
 from .views.user_view import location_view, profile_view, register_view
 from django.conf import settings
@@ -20,7 +21,12 @@ urlpatterns = [
     path('register/', register_view),
     path('profile/', profile_view),
 
-    path('products/barcode/', lookup_barcode)
+    path('products/barcode/', lookup_barcode),
+
+    path('api/grocery/', grocery_lists),
+    path('api/grocery/<int:list_id>/', grocery_list_detail),
+    path('api/grocery/<int:list_id>/items/', add_item),
+    path('api/grocery/<int:list_id>/items/<int:item_id>/', item_detail),
 
     
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
