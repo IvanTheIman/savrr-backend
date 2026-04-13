@@ -9,7 +9,7 @@ from api.services.google_maps import distance
 
 
 @api_view(['GET'])
-@permission_classes[(AllowAny)]
+@permission_classes([AllowAny])
 def products_info(request):
     user_lat = request.query_params.get('lat')
     user_lon = request.query_params.get('lng')
