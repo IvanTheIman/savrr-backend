@@ -23,10 +23,10 @@ urlpatterns = [
 
     path('products/barcode/', lookup_barcode),
 
-    path('api/grocery/', grocery_lists),
-    path('api/grocery/<int:list_id>/', grocery_list_detail),
-    path('api/grocery/<int:list_id>/items/', add_item),
-    path('api/grocery/<int:list_id>/items/<int:item_id>/', item_detail),
+    path('grocery/', grocery_lists),
+    path('grocery/<int:list_id>/', grocery_list_detail),
+    path('grocery/<int:list_id>/items/', add_item),
+    path('grocery/<int:list_id>/items/<int:item_id>/', item_detail),
 
     
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
