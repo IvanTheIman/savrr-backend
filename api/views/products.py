@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from api.models import PriceHistory, Product, Store
@@ -8,6 +9,7 @@ from api.services.google_maps import distance
 
 
 @api_view(['GET'])
+@permission_classes[(AllowAny)]
 def products_info(request):
     user_lat = request.query_params.get('lat')
     user_lon = request.query_params.get('lng')

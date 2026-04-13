@@ -8,6 +8,7 @@ from .products import products_info
 from api.models import UserProfile
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def location_view(request):
 
     serializer = UserLocationSerializer(data = request.data)
