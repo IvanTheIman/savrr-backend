@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from api.models import GroceryList, GroceryItem, Product
-from api.serializers.grocery_serializer import GroceryListSerializer, GroceryItemSerializer
+from api.serializers.gorcery_list_serializer import GroceryListSerializer, GroceryItemSerializer
 
 
 @api_view(['GET', 'POST'])
