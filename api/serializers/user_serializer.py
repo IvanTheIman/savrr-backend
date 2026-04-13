@@ -8,7 +8,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'email', 'phone')
+        fields = ('username', 'password', 'email')
 
     def create(self, validated_data):
         # Use create_user so password is hashed, never stored plain
