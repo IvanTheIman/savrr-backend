@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from api.models import PriceHistory, Product, Store
-from api.serializers.serializer import ProductSerializer
+from api.serializers.product_serializer import ProductSerializer
 from django.db.models import Prefetch, OuterRef, Subquery, Min
 from api.services.google_maps import distance
 
