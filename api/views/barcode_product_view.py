@@ -1,222 +1,185 @@
-# api/views/product_views.py
+# api/views/barcode_product_view.py
 
 import requests
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from ..models import Product, Store, PriceHistory
-from ..serializers.product_serializer import (
-    ProductSerializer, 
-    BarcodeLookupSerializer, 
-    StoreSerializer,
-)
+from rest_framework import status
+from django.db.models import Q
+from ..models import Product, Store, ProductBarcode
+from ..serializers.product_serializer import BarcodeLookupSerializer
 
 
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def barcode_lookup_view(request, barcode):
+    """
+    Lookup product by barcode - saves new barcodes automatically
+    GET /api/products/barcode/{barcode}/?store_id=1
+    """
+    store_id = request.GET.get('store_id')
+    store = None
     
-    @action(detail=False, methods=['get'], url_path='barcode/(?P<barcode>[^/.]+)')
-    def lookup_barcode(self, request, barcode=None):
-        """
-        Lookup product by barcode with Open Food Facts fallback
-        GET /api/products/barcode/{barcode}/?store_id=1
-        """
-        store_id = request.query_params.get('store_id')
-        store = None
-        
-        if store_id:
-            try:
-                store = Store.objects.get(id=store_id)
-            except Store.DoesNotExist:
-                return Response({
-                    'success': False,
-                    'error': 'Store not found'
-                }, status=status.HTTP_404_NOT_FOUND)
-        
-        # Step 1: Check if product exists in our database
+    if store_id:
         try:
-            product = Product.objects.get(barcode=barcode)
-            serializer = BarcodeLookupSerializer(product, context={'store': store})
+            store = Store.objects.get(id=store_id)
+        except Store.DoesNotExist:
+            return Response({
+                'success': False,
+                'error': 'Store not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+    
+    # Step 1: Check if barcode already exists in ProductBarcode table
+    try:
+        product_barcode = ProductBarcode.objects.select_related('product').get(barcode=barcode)
+        product = product_barcode.product
+        
+        serializer = BarcodeLookupSerializer(product, context={'store': store})
+        
+        return Response({
+            'success': True,
+            'supported': True,
+            'product': serializer.data,
+            'source': 'database'
+        })
+        
+    except ProductBarcode.DoesNotExist:
+        # Step 2: Barcode not found - try Open Food Facts
+        print(f"Barcode {barcode} not found in database. Checking Open Food Facts...")
+        
+        external_data = fetch_from_open_food_facts(barcode)
+        
+        if external_data:
+            # Step 3: Found in Open Food Facts - try to match or create product
+            product_name = external_data['name']
+            
+            # Try to find existing product with similar name
+            existing_product = Product.objects.filter(
+                Q(name__iexact=product_name) |  # Exact match (case insensitive)
+                Q(name__icontains=product_name.split()[0])  # First word match
+            ).first()
+            
+            if existing_product:
+                # Match found - link barcode to existing product
+                print(f"Matched barcode {barcode} to existing product: {existing_product.name}")
+                
+                ProductBarcode.objects.create(
+                    product=existing_product,
+                    barcode=barcode,
+                    variant_name=product_name,
+                    source='Open Food Facts'
+                )
+                
+                serializer = BarcodeLookupSerializer(existing_product, context={'store': store})
+                
+                return Response({
+                    'success': True,
+                    'supported': True,
+                    'product': serializer.data,
+                    'source': 'matched_existing',
+                    'message': f'Barcode linked to existing product: {existing_product.name}'
+                })
+            else:
+                # No match - create new product
+                print(f"Creating new product for barcode {barcode}: {product_name}")
+                
+                new_product = Product.objects.create(
+                    product_id=f"auto_{barcode}",
+                    name=product_name,
+                    unit=external_data.get('unit', 'each'),
+                )
+                
+                ProductBarcode.objects.create(
+                    product=new_product,
+                    barcode=barcode,
+                    variant_name=product_name,
+                    source='Open Food Facts'
+                )
+                
+                serializer = BarcodeLookupSerializer(new_product, context={'store': store})
+                
+                return Response({
+                    'success': True,
+                    'supported': True,
+                    'product': serializer.data,
+                    'source': 'created_new',
+                    'message': 'New product created from Open Food Facts. Price not available yet.'
+                })
+        else:
+            # Step 4: Not found anywhere
+            print(f"Barcode {barcode} not found in Open Food Facts")
             
             return Response({
                 'success': True,
-                'supported': True,
-                'product': serializer.data,
-                'source': 'database'
-            })
+                'supported': False,
+                'message': 'Item pricing not supported at this time',
+                'barcode': barcode
+            }, status=status.HTTP_200_OK)
+
+
+def fetch_from_open_food_facts(barcode):
+    """
+    Fetch product information from Open Food Facts API
+    Returns dict with product info or None if not found
+    """
+    try:
+        url = f'https://world.openfoodfacts.net/api/v2/product/{barcode}'
+        print(f"Fetching from Open Food Facts: {url}")
+        
+        headers = {
+            'User-Agent': 'GroceryPriceApp/1.0',
+            'Accept': 'application/json'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
             
-        except Product.DoesNotExist:
-            # Step 2: Product not in database, try Open Food Facts
-            print(f"Product with barcode {barcode} not found. Checking Open Food Facts...")
-            
-            external_data = self._fetch_from_open_food_facts(barcode)
-            
-            if external_data:
-                # Step 3: Save the product to database
-                try:
-                    product = Product.objects.create(
-                        product_id=barcode,  # Use barcode as product_id
-                        name=external_data['name'],
-                        unit=external_data.get('unit', 'each'),
-                        barcode=barcode,
-                    )
-                    
-                    print(f"Successfully saved new product: {product.name}")
-                    
-                    # Return the newly created product
-                    serializer = BarcodeLookupSerializer(product, context={'store': store})
-                    
-                    return Response({
-                        'success': True,
-                        'supported': True,
-                        'product': serializer.data,
-                        'source': 'open_food_facts',
-                        'message': 'Product found and added to database. Price not available yet.'
-                    })
-                    
-                except Exception as e:
-                    print(f"Error saving product: {e}")
-                    return Response({
-                        'success': False,
-                        'error': f'Failed to save product: {str(e)}'
-                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            else:
-                # Step 4: Not found anywhere
-                return Response({
-                    'success': True,
-                    'supported': False,
-                    'message': 'Item pricing not supported at this time',
-                    'barcode': barcode
-                }, status=status.HTTP_200_OK)
-    
-    def _fetch_from_open_food_facts(self, barcode):
-        """
-        Fetch product information from Open Food Facts API
-        Returns dict with product info or None if not found
-        """
-        try:
-            url = f'https://world.openfoodfacts.org/api/v0/product/{barcode}.json'
-            print(f"Fetching from Open Food Facts: {url}")
-            
-            response = requests.get(url, timeout=10)
-            
-            if response.status_code == 200:
-                data = response.json()
+            if data.get('status') == 1 and data.get('product'):
+                product_data = data['product']
                 
-                # Check if product was found
-                if data.get('status') == 1 and data.get('product'):
-                    product_data = data['product']
-                    
-                    # Extract product name (try multiple fields)
-                    name = (
-                        product_data.get('product_name') or 
-                        product_data.get('product_name_en') or 
-                        product_data.get('generic_name') or
-                        'Unknown Product'
-                    )
-                    
-                    # Try to determine unit
-                    unit = 'each'  # default
-                    quantity = product_data.get('quantity', '')
-                    if quantity:
-                        if 'kg' in quantity.lower():
-                            unit = 'kg'
-                        elif 'g' in quantity.lower():
-                            unit = 'g'
-                        elif 'l' in quantity.lower() or 'liter' in quantity.lower():
-                            unit = 'L'
-                        elif 'ml' in quantity.lower():
-                            unit = 'ml'
-                    
-                    print(f"Found product: {name}")
-                    
-                    return {
-                        'name': name,
-                        'unit': unit,
-                        'brand': product_data.get('brands'),
-                        'category': product_data.get('categories'),
-                        'quantity': product_data.get('quantity'),
-                    }
-                else:
-                    print(f"Product not found in Open Food Facts (status: {data.get('status')})")
-                    return None
+                # Extract product name
+                name = (
+                    product_data.get('product_name') or 
+                    product_data.get('product_name_en') or 
+                    product_data.get('generic_name') or
+                    'Unknown Product'
+                )
+                
+                # Try to determine unit
+                unit = 'each'
+                quantity = product_data.get('quantity', '')
+                if quantity:
+                    quantity_lower = quantity.lower()
+                    if 'kg' in quantity_lower:
+                        unit = 'kg'
+                    elif 'g' in quantity_lower and 'kg' not in quantity_lower:
+                        unit = 'g'
+                    elif 'l' in quantity_lower or 'liter' in quantity_lower:
+                        unit = 'L'
+                    elif 'ml' in quantity_lower:
+                        unit = 'ml'
+                
+                print(f"✅ Found product: {name}")
+                
+                return {
+                    'name': name,
+                    'unit': unit,
+                }
             else:
-                print(f"Open Food Facts API returned status: {response.status_code}")
+                print(f" Product not found in Open Food Facts")
                 return None
-                
-        except requests.exceptions.Timeout:
-            print("Open Food Facts API timeout")
+        elif response.status_code == 404:
+            print(f" Product {barcode} not found in Open Food Facts database")
             return None
-        except Exception as e:
-            print(f"Error fetching from Open Food Facts: {e}")
+        else:
+            print(f" Open Food Facts API returned status: {response.status_code}")
             return None
-    
-    @action(detail=False, methods=['get'])
-    def search(self, request):
-        """
-        Search products by name
-        GET /api/products/search/?q=banana&store_id=1
-        """
-        query = request.query_params.get('q', '')
-        store_id = request.query_params.get('store_id')
-        
-        if not query:
-            return Response({
-                'success': False,
-                'error': 'Query parameter "q" is required'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        products = Product.objects.filter(name__icontains=query)
-        
-        store = None
-        if store_id:
-            try:
-                store = Store.objects.get(id=store_id)
-            except Store.DoesNotExist:
-                pass
-        
-        serializer = BarcodeLookupSerializer(
-            products, 
-            many=True, 
-            context={'store': store}
-        )
-        
-        return Response({
-            'success': True,
-            'count': len(serializer.data),
-            'products': serializer.data
-        })
-
-
-class StoreViewSet(viewsets.ModelViewSet):
-    queryset = Store.objects.all()
-    serializer_class = StoreSerializer
-    
-    @action(detail=False, methods=['get'])
-    def nearby(self, request):
-        """
-        Get nearby stores based on lat/lng
-        GET /api/stores/nearby/?lat=32.3&lng=-95.3
-        """
-        lat = request.query_params.get('lat')
-        lng = request.query_params.get('lng')
-        
-        if not lat or not lng:
-            return Response({
-                'success': False,
-                'error': 'lat and lng parameters required'
-            }, status=status.HTTP_400_BAD_REQUEST)
-        
-        stores = Store.objects.filter(
-            latitude__isnull=False,
-            longitude__isnull=False
-        )
-        
-        serializer = self.get_serializer(stores, many=True)
-        
-        return Response({
-            'success': True,
-            'stores': serializer.data
-        })
+            
+    except requests.exceptions.Timeout:
+        print("⏱️ Open Food Facts API timeout")
+        return None
+    except Exception as e:
+        print(f" Error fetching from Open Food Facts: {e}")
+        return None

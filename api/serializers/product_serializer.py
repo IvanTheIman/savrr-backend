@@ -1,5 +1,7 @@
+# api/serializers/product_serializer.py
+
 from rest_framework import serializers
-from ..models import PriceHistory, Product, UserLocation
+from ..models import PriceHistory, Product, UserLocation, Store  # Make sure Store is imported
 
 class PriceHistorySerializer(serializers.ModelSerializer):
     store = serializers.CharField(source = 'store.name')
@@ -33,6 +35,14 @@ class UserLocationSerializer(serializers.ModelSerializer):
         model = UserLocation
         fields = "__all__"
 
+
+# ADD THIS - StoreSerializer
+class StoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+        fields = ['id', 'store_id', 'name', 'location', 'latitude', 'longitude']
+
+
 class BarcodeLookupSerializer(serializers.ModelSerializer):
     """Serializer specifically for barcode lookup with single store pricing"""
     price = serializers.SerializerMethodField()
@@ -54,4 +64,3 @@ class BarcodeLookupSerializer(serializers.ModelSerializer):
         """Get the store name from context"""
         store = self.context.get('store')
         return store.name if store else None
-
