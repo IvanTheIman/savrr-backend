@@ -79,28 +79,13 @@ class GroceryList(models.Model):
         on_delete=models.CASCADE,
         related_name='grocery_lists'
     )
-    store = models.ForeignKey(
-        Store,
-        on_delete=models.SET_NULL,  # list survives if store is deleted
-        null=True,
-        related_name='grocery_lists'
-    )
     name = models.CharField(max_length=100, default='My Grocery List')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.owner.username} — {self.name} @ {self.store}"
+        return f"{self.owner.username} — {self.name}"
 
-    @property
-    def total_price(self):
-        # Sums estimated cost across all items using latest store price
-        total = 0
-        for item in self.items.all():
-            price = item.product.get_price(self.store)
-            if price:
-                total += price * item.quantity
-        return total
 
 
 class GroceryItem(models.Model):

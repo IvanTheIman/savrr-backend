@@ -44,9 +44,18 @@ def add_item(request, list_id):
 
     # accepts product name as free text, matches or creates product
     name = request.data.get('name', '').strip()
+    store_id = request.data.get('store_id')
+
     if not name:
         return Response({'error': 'name is required'}, status=status.HTTP_400_BAD_REQUEST)
-
+    if not store_id:
+        return Response({'error': 'store_id is required'}, status = status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        store = Store.objects.get(id=store_id)
+    except Store.DoesNotExist:
+        return Response({'error': 'store not found'}, status=status.HTTP_404_NOT_FOUND)
+    
     product, _ = Product.objects.get_or_create(
         name__iexact=name,
         defaults={'name': name, 'product_id': name.lower().replace(' ', '_'), 'unit': ''}
