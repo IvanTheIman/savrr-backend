@@ -32,3 +32,26 @@ class UserLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserLocation
         fields = "__all__"
+
+class BarcodeLookupSerializer(serializers.ModelSerializer):
+    """Serializer specifically for barcode lookup with single store pricing"""
+    price = serializers.SerializerMethodField()
+    store_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Product
+        fields = ['id', 'product_id', 'name', 'unit', 'barcode', 'price', 'store_name']
+    
+    def get_price(self, obj):
+        """Get price for the specific store passed in context"""
+        store = self.context.get('store')
+        if store:
+            price = obj.get_price(store)
+            return float(price) if price else None
+        return None
+    
+    def get_store_name(self, obj):
+        """Get the store name from context"""
+        store = self.context.get('store')
+        return store.name if store else None
+
