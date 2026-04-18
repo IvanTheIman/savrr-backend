@@ -74,17 +74,20 @@ def geocode_zipcode(request):
     
     try:
         # Call Census Bureau Geocoding API
-        url = 'https://geocoding.geo.census.gov/geocoder/locations/address'
+        url = 'https://nominatim.openstreetmap.org/search'
         params = {
-            'street': '',
-            'city': '',
-            'state': '',
-            'zip': zipcode,
-            'benchmark': '2020',
-            'format': 'json'
+            'postalcode': zipcode,
+            'country': 'US',
+            'format': 'json',
+            'limit': 1
         }
+        headers = {
+            'User-Agent': 'SavrrGroceryApp/1.0'  # Required by Nominatim
+        }
+            
+        print(f'🗺️ Geocoding zipcode: {zipcode}')
         
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(url, params=params, headers=headers, timeout=10)
         
         if response.status_code == 200:
             data = response.json()
