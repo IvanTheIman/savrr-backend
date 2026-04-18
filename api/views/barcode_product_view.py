@@ -183,3 +183,23 @@ def fetch_from_open_food_facts(barcode):
     except Exception as e:
         print(f" Error fetching from Open Food Facts: {e}")
         return None
+    
+@api_view(['POST'])
+def add_barcode_to_product(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id)
+        barcode = request.data.get('barcode')
+        
+        if not barcode:
+            return Response({'error': 'Barcode required'}, status=400)
+        
+        # Save or update barcode
+        product.barcode = barcode
+        product.save()
+        
+        return Response({
+            'success': True,
+            'message': 'Barcode added to product'
+        })
+    except Product.DoesNotExist:
+        return Response({'error': 'Product not found'}, status=404)
