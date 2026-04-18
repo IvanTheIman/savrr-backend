@@ -20,7 +20,7 @@ urlpatterns = [
     path('token/blacklist/', TokenBlacklistView.as_view(), name = 'token_blacklist'),
 
     path('register/', register_view),
-    path('profile/', profile_view),
+    #path('profile/', profile_view),
 
     path('products/barcode/', lookup_barcode),
 
