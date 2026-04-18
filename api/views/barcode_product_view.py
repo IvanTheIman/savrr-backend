@@ -14,7 +14,7 @@ from ..serializers.product_serializer import BarcodeLookupSerializer
 @permission_classes([AllowAny])
 def barcode_lookup_view(request, barcode):
     """
-    Lookup product by barcode - saves new barcodes automatically
+    Lookup product by barcode - links to existing products only
     GET /api/products/barcode/{barcode}/?store_id=1
     """
     store_id = request.GET.get('store_id')
@@ -50,18 +50,18 @@ def barcode_lookup_view(request, barcode):
         external_data = fetch_from_open_food_facts(barcode)
         
         if external_data:
-            # Step 3: Found in Open Food Facts - try to match or create product
+            # Step 3: Found in Open Food Facts - try to match EXISTING product only
             product_name = external_data['name']
             
             # Try to find existing product with similar name
             existing_product = Product.objects.filter(
                 Q(name__iexact=product_name) |  # Exact match (case insensitive)
-                Q(name__icontains=product_name.split()[0])  # First word match
+                Q(name__icontains=product_name.split()[0]) if product_name.split() else Q()  # First word match
             ).first()
             
             if existing_product:
                 # Match found - link barcode to existing product
-                print(f"Matched barcode {barcode} to existing product: {existing_product.name}")
+                print(f"✅ Matched barcode {barcode} to existing product: {existing_product.name}")
                 
                 ProductBarcode.objects.create(
                     product=existing_product,
@@ -77,37 +77,21 @@ def barcode_lookup_view(request, barcode):
                     'supported': True,
                     'product': serializer.data,
                     'source': 'matched_existing',
-                    'message': f'Barcode linked to existing product: {existing_product.name}'
+                    'message': f'Barcode linked to existing product'
                 })
             else:
-                # No match - create new product
-                print(f"Creating new product for barcode {barcode}: {product_name}")
-                
-                new_product = Product.objects.create(
-                    product_id=f"auto_{barcode}",
-                    name=product_name,
-                    unit=external_data.get('unit', 'each'),
-                )
-                
-                ProductBarcode.objects.create(
-                    product=new_product,
-                    barcode=barcode,
-                    variant_name=product_name,
-                    source='Open Food Facts'
-                )
-                
-                serializer = BarcodeLookupSerializer(new_product, context={'store': store})
+                # No match found - DO NOT CREATE, just return not supported
+                print(f"❌ No matching product found for: {product_name}")
                 
                 return Response({
                     'success': True,
-                    'supported': True,
-                    'product': serializer.data,
-                    'source': 'created_new',
-                    'message': 'New product created from Open Food Facts. Price not available yet.'
-                })
+                    'supported': False,
+                    'message': f'Product "{product_name}" not in our database yet',
+                    'barcode': barcode
+                }, status=status.HTTP_200_OK)
         else:
-            # Step 4: Not found anywhere
-            print(f"Barcode {barcode} not found in Open Food Facts")
+            # Step 4: Not found in Open Food Facts either
+            print(f"❌ Barcode {barcode} not found in Open Food Facts")
             
             return Response({
                 'success': True,
@@ -168,24 +152,31 @@ def fetch_from_open_food_facts(barcode):
                     'unit': unit,
                 }
             else:
-                print(f" Product not found in Open Food Facts")
+                print(f"❌ Product not found in Open Food Facts")
                 return None
         elif response.status_code == 404:
-            print(f" Product {barcode} not found in Open Food Facts database")
+            print(f"❌ Product {barcode} not found in Open Food Facts database")
             return None
         else:
-            print(f" Open Food Facts API returned status: {response.status_code}")
+            print(f"⚠️ Open Food Facts API returned status: {response.status_code}")
             return None
             
     except requests.exceptions.Timeout:
         print("⏱️ Open Food Facts API timeout")
         return None
     except Exception as e:
-        print(f" Error fetching from Open Food Facts: {e}")
+        print(f"❌ Error fetching from Open Food Facts: {e}")
         return None
-    
+
+
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def add_barcode_to_product(request, product_id):
+    """
+    Manually link a barcode to an existing product
+    POST /api/products/{product_id}/add-barcode/
+    Body: {"barcode": "012345678901"}
+    """
     try:
         product = Product.objects.get(id=product_id)
         barcode = request.data.get('barcode')
@@ -193,9 +184,18 @@ def add_barcode_to_product(request, product_id):
         if not barcode:
             return Response({'error': 'Barcode required'}, status=400)
         
-        # Save or update barcode
-        product.barcode = barcode
-        product.save()
+        # Check if barcode already exists
+        if ProductBarcode.objects.filter(barcode=barcode).exists():
+            return Response({
+                'error': 'Barcode already linked to another product'
+            }, status=400)
+        
+        # Create the barcode link
+        ProductBarcode.objects.create(
+            product=product,
+            barcode=barcode,
+            source='Manual'
+        )
         
         return Response({
             'success': True,
