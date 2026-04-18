@@ -5,7 +5,7 @@ from api.services.barcode import lookup_barcode
 from api.views.barcode_product_view import add_barcode_to_product, barcode_lookup_view
 from api.views.grocery_list import add_item, grocery_list_detail, grocery_lists, item_detail, store_list
 from .views.products import products_info
-from .views.user_view import location_view, profile_view, register_view, geocode_zipcode
+from .views.user_view import location_view, register_view, geocode_zipcode
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView

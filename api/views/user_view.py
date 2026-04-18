@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from api.serializers.product_serializer import UserLocationSerializer
-from api.serializers.user_serializer import RegisterSerializer, UserProfileSerializer
+from api.serializers.user_serializer import RegisterSerializer
 from .products import products_info
 from api.models import UserProfile
 
@@ -42,7 +42,7 @@ def register_view(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', 'PATCH'])
+"""@api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def profile_view(request):
     profile = request.user.profile
@@ -57,7 +57,7 @@ def profile_view(request):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+"""
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
