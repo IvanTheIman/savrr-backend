@@ -58,3 +58,65 @@ def profile_view(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def geocode_zipcode(request):
+    """
+    Convert zipcode to lat/lng using Census Bureau API
+    POST /api/location/geocode/
+    Body: {"zipcode": "75701"}
+    """
+    zipcode = request.data.get('zipcode', '').strip()
+    
+    if not zipcode:
+        return Response({'error': 'Zipcode required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        # Call Census Bureau Geocoding API
+        url = 'https://geocoding.geo.census.gov/geocoder/locations/address'
+        params = {
+            'street': '',
+            'city': '',
+            'state': '',
+            'zip': zipcode,
+            'benchmark': '2020',
+            'format': 'json'
+        }
+        
+        response = requests.get(url, params=params, timeout=10)
+        
+        if response.status_code == 200:
+            data = response.json()
+            
+            if data.get('result', {}).get('addressMatches'):
+                match = data['result']['addressMatches'][0]
+                coordinates = match['coordinates']
+                
+                return Response({
+                    'success': True,
+                    'latitude': coordinates['y'],
+                    'longitude': coordinates['x'],
+                    'zipcode': zipcode
+                })
+            else:
+                return Response({
+                    'success': False,
+                    'error': 'Invalid zipcode or no results found'
+                }, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response({
+                'success': False,
+                'error': 'Geocoding service unavailable'
+            }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            
+    except requests.exceptions.Timeout:
+        return Response({
+            'success': False,
+            'error': 'Geocoding request timed out'
+        }, status=status.HTTP_504_GATEWAY_TIMEOUT)
+    except Exception as e:
+        print(f'Geocoding error: {e}')
+        return Response({
+            'success': False,
+            'error': 'Failed to geocode zipcode'
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
