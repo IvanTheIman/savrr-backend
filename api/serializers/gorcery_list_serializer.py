@@ -14,7 +14,7 @@ class GroceryListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroceryList
-        fields = ('id', 'name', 'store', 'created_at', 'items')
+        fields = ('id', 'name', 'created_at', 'items')
         read_only_fields = ('owner',)
 
 class StoreSerializer(serializers.ModelSerializer):
