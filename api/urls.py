@@ -33,9 +33,5 @@ urlpatterns = [
 
     path('products/barcode/<str:barcode>/', barcode_lookup_view, name='barcode-lookup'),
 
-    path('products/search/', search_products, name='search_products'),
-    path('products/<str:product_id>/add-barcode/', add_barcode_to_product, name='add_barcode'),
-    path('products/barcode/<str:barcode>/', get_product_by_barcode, name='get_product_by_barcode'),
-
-    
+   
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)
