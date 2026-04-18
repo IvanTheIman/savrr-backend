@@ -63,7 +63,7 @@ def profile_view(request):
 @permission_classes([AllowAny])
 def geocode_zipcode(request):
     """
-    Convert zipcode to lat/lng using Nominatim (OpenStreetMap) API
+    Convert zipcode to lat/lng using Zippopotam API
     POST /api/location/geocode/
     Body: {"zipcode": "75701"}
     """
@@ -73,30 +73,21 @@ def geocode_zipcode(request):
         return Response({'error': 'Zipcode required'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
-        # Use Nominatim (OpenStreetMap) geocoding API
-        url = 'https://nominatim.openstreetmap.org/search'
-        params = {
-            'postalcode': zipcode,
-            'country': 'US',
-            'format': 'json',
-            'limit': 1
-        }
-        headers = {
-            'User-Agent': 'SavrrGroceryApp/1.0'
-        }
+        # Use Zippopotam.us API (free, no rate limits)
+        url = f'https://api.zippopotam.us/us/{zipcode}'
         
         print(f'🗺️ Geocoding zipcode: {zipcode}')
         
-        response = requests.get(url, params=params, headers=headers, timeout=10)
+        response = requests.get(url, timeout=10)
         
         if response.status_code == 200:
-            data = response.json()  # This is a LIST, not a dict
+            data = response.json()
             
-            # Check if we got results (data is a list)
-            if data and len(data) > 0:
-                result = data[0]  # Get first result from list
-                latitude = float(result['lat'])  # NOW use dict methods
-                longitude = float(result['lon'])
+            # Get coordinates from first place
+            if 'places' in data and len(data['places']) > 0:
+                place = data['places'][0]
+                latitude = float(place['latitude'])
+                longitude = float(place['longitude'])
                 
                 print(f'✅ Geocoded to: {latitude}, {longitude}')
                 
@@ -110,8 +101,14 @@ def geocode_zipcode(request):
                 print(f'❌ No results for zipcode: {zipcode}')
                 return Response({
                     'success': False,
-                    'error': 'Invalid zipcode or no results found'
+                    'error': 'Invalid zipcode'
                 }, status=status.HTTP_404_NOT_FOUND)
+        elif response.status_code == 404:
+            print(f'❌ Invalid zipcode: {zipcode}')
+            return Response({
+                'success': False,
+                'error': 'Invalid zipcode'
+            }, status=status.HTTP_404_NOT_FOUND)
         else:
             print(f'⚠️ Geocoding API returned: {response.status_code}')
             return Response({
