@@ -3,10 +3,11 @@ from api.models import GroceryList, GroceryItem, Product, Store
 
 class GroceryItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)
+    store_name = serializers.CharField(source = 'store.name', read_only = True)
 
     class Meta:
         model = GroceryItem
-        fields = ('id', 'product', 'product_name', 'quantity', 'is_checked')
+        fields = ('id', 'product', 'product_name','store', 'quantity', 'is_checked')
 
 class GroceryListSerializer(serializers.ModelSerializer):
     items = GroceryItemSerializer(many=True, read_only=True)

@@ -116,17 +116,21 @@ class GroceryItem(models.Model):
         on_delete=models.CASCADE,
         related_name='grocery_items'
     )
+    store = models.ForeignKey(Store, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     is_checked = models.BooleanField(default=False)  # user ticks off as they shop
 
     class Meta:
-        unique_together = ('grocery_list', 'product')  # no duplicate products in same list
+        unique_together = ('grocery_list', 'product', 'store')  # no duplicate products in same list
 
     def __str__(self):
-        return f"{self.quantity}x {self.product.name}"
+        store_name = self.store.name if self.store else "No Store"
+        return f"{self.quantity}x {self.product.name} @ {store_name}"
 
     @property
     def subtotal(self):
+        if not self.store:
+            return None
         price = self.product.get_price(self.grocery_list.store)
         return price * self.quantity if price else None
 
