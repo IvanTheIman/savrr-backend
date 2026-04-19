@@ -9,6 +9,10 @@ class GroceryItemSerializer(serializers.ModelSerializer):
         model = GroceryItem
         fields = ('id', 'product', 'product_name','store', 'store_name' 'quantity', 'is_checked')
 
+    def get_store_name(self, obj):
+        # Handle null stores gracefully
+        return obj.store.name if obj.store else "No store"
+
 class GroceryListSerializer(serializers.ModelSerializer):
     items = GroceryItemSerializer(many=True, read_only=True)
 
