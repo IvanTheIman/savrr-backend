@@ -7,7 +7,7 @@ class GroceryItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroceryItem
-        fields = ('id', 'product', 'product_name','store', 'quantity', 'is_checked')
+        fields = ('id', 'product', 'product_name','store', 'store_name' 'quantity', 'is_checked')
 
 class GroceryListSerializer(serializers.ModelSerializer):
     items = GroceryItemSerializer(many=True, read_only=True)
