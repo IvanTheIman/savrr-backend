@@ -7,7 +7,7 @@ class GroceryItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GroceryItem
-        fields = ('id', 'product', 'product_name','store', 'store_name' 'quantity', 'is_checked')
+        fields = ('id', 'product', 'product_name','store', 'store_name', 'quantity', 'is_checked')
 
     def get_store_name(self, obj):
         # Handle null stores gracefully
