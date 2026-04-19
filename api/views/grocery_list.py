@@ -40,7 +40,7 @@ def add_item(request, list_id):
     try:
         grocery_list = GroceryList.objects.get(id=list_id, owner=request.user)
     except GroceryList.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'List not found'}, status=status.HTTP_404_NOT_FOUND)
 
     # accepts product name as free text, matches or creates product
     name = request.data.get('name', '').strip()
@@ -49,21 +49,29 @@ def add_item(request, list_id):
     if not name:
         return Response({'error': 'name is required'}, status=status.HTTP_400_BAD_REQUEST)
     if not store_id:
-        return Response({'error': 'store_id is required'}, status = status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'store_id is required'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
         store = Store.objects.get(id=store_id)
     except Store.DoesNotExist:
-        return Response({'error': 'store not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Store not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    product, _ = Product.objects.get_or_create(
-        name__iexact=name,
-        defaults={'name': name, 'product_id': name.lower().replace(' ', '_'), 'unit': ''}
-    )
+    # Find product by name (case-insensitive)
+    try:
+        product = Product.objects.get(name__iexact=name)
+    except Product.DoesNotExist:
+        # Create new product if not found
+        product = Product.objects.create(
+            name=name,
+            product_id=name.lower().replace(' ', '_'),
+            unit=''
+        )
 
+    # Create or get grocery item with store
     item, created = GroceryItem.objects.get_or_create(
         grocery_list=grocery_list,
         product=product,
+        store=store,  # ADD THIS - very important!
         defaults={'quantity': 1}
     )
 
@@ -72,7 +80,6 @@ def add_item(request, list_id):
         item.save()
 
     return Response(GroceryItemSerializer(item).data, status=status.HTTP_201_CREATED)
-
 
 @api_view(['PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
