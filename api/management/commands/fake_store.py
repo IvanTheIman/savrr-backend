@@ -1,10 +1,13 @@
 import json
 import random
 from django.core.management.base import BaseCommand
-from api.models import Store, Product, PriceHistory
+from api.models import Store
 from api.services.location.google_maps import Coords
 
 class Command(BaseCommand):
+     """
+     function that generates Stores from json file and populates the database
+     """
      def handle(self, *args, **kwargs):
         with open("api/data/stores.json", "r") as file:
             raw_stores = json.load(file)

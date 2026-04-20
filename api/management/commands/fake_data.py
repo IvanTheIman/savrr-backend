@@ -1,5 +1,4 @@
 import json
-import time
 from django.utils.timezone import now
 from django.core.management.base import BaseCommand
 from api.models import Store, Product, PriceHistory
@@ -7,7 +6,10 @@ from api.services.price_randomizer import randomizer
 
 
 class Command(BaseCommand):
-    help = "Generate fake data for app"
+    """
+    function that takes data from item and store json file and generates random prices using randomizer
+    algorithm and populates database
+    """
 
     def handle(self, *args, **kwargs):
         with open("api/data/items.json", "r") as file1, open("api/data/stores.json") as file2:

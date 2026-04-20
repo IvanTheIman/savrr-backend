@@ -4,6 +4,9 @@ import requests
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
 def Coords(address):
+    """
+    function that attempts to upload user location to Google Maps Places API
+    """
     url = "https://maps.googleapis.com/maps/api/geocode/json"
 
     params = {
@@ -21,6 +24,9 @@ def Coords(address):
     return None, None
 
 def distance(user_coords, store_list_coords, mode = "driving"):
+    """
+    function that uses upload user's location and gets distnaces from every store
+    """
     if not store_list_coords:
         return []
     

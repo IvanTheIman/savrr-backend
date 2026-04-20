@@ -4,7 +4,10 @@ from api.services.kroger import product_search
 from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
-    help = "run Kroger searches from JSON file"
+    """
+    function that runs the kroger.py file using the locations provided, populating the database with price
+    per item oer location
+    """
 
     def handle(self, *args, **kwargs):
         with open("api/data/items.json", "r") as file:

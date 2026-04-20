@@ -4,7 +4,10 @@ from api.models import Product
 from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
-    help = "attach images to products based on filename"
+    """
+    function that assists in attaching local files to a cloud service and then connecting images
+    to preespective products in database
+    """
 
     def handle(self, *args, **kwargs):
         folder = "media"

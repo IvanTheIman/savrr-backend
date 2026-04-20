@@ -1,7 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
+from api.models import UserLocation
+
 class RegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration which includes a function to create a new user
+    """
     first_name = serializers.CharField(required=True) 
     last_name = serializers.CharField(required=True)  
     
@@ -21,3 +26,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             last_name=validated_data.get('last_name', ''),    
         )
         return user
+    
+class UserLocationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user location
+    """
+    class Meta:
+        model = UserLocation
+        fields = "__all__"

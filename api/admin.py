@@ -2,7 +2,7 @@ from django.contrib import admin
 from api.models import Product
 
 from django.contrib import admin
-from .models import Store, Product, ProductBarcode, PriceHistory, User, UserProfile, UserLocation, GroceryList, GroceryItem
+from .models import Store, Product, ProductBarcode, PriceHistory
 
 class ProductBarcodeInline(admin.TabularInline):
     model = ProductBarcode

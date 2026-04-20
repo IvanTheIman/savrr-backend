@@ -1,6 +1,5 @@
-from django.urls import include, path
+from django.urls import path
 from django.contrib import admin
-
 from api.services.barcode.barcode_lookup import lookup_barcode
 from api.views.barcode.barcode_lookup_view import barcode_lookup_view
 from api.views.grocery.grocery_list import  grocery_lists
@@ -12,8 +11,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
     path('products_info/', products_info, name = 'products_info'),
     path('location/', location_view),
+    path('location/geocode/', geocode_zipcode, name='geocode-zipcode'),
     
     path('token/', TokenObtainPairView.as_view(), name = 'token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name = 'token_refresh'),
@@ -22,12 +23,10 @@ urlpatterns = [
     path('register/', register_view),
 
     path('products/barcode/', lookup_barcode),
+    path('products/barcode/<str:barcode>/', barcode_lookup_view, name='barcode-lookup'),
 
     path('grocery/', grocery_lists),
 
-    path('products/barcode/<str:barcode>/', barcode_lookup_view, name='barcode-lookup'),
-
-    path('location/geocode/', geocode_zipcode, name='geocode-zipcode'),
 
    
 ] + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

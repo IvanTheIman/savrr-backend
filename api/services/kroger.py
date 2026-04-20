@@ -14,6 +14,10 @@ token_expiration = 0
 
 
 def get_token_kroger(scope):
+    """
+    function that takes client id and secret from env file and attempts to make a call to the 
+    Kroger product api.
+    """
     CLIENT_ID = os.getenv("KROGER_CLIENT_ID")
     CLIENT_SECRET = os.getenv("KROGER_CLIENT_SECRET")
     global token, token_expiration
@@ -48,28 +52,13 @@ def get_token_kroger(scope):
     return None
 
 
-def location_search(zip):
-    t = get_token_kroger("location.compact")
-    if not t:
-        return None
-
-    response = requests.get(
-        "https://api-ce.kroger.com/v1/locations",  # typo fixed
-        headers={
-            "Authorization": f"Bearer {t}",        # typo fixed
-            "Accept": "application/json",
-        },
-        params={"filter.zipcode.near": zip},
-    )
-
-    if response.status_code == 200:
-        return response.json()
-
-    print(f" Location search failed: {response.status_code}")
-    return None
-
 
 def product_search(term, location_id):
+    """
+    function that runs once call to Kroger API is successful. takes json response and attempts to format
+    into store into store model, each product into product model and each price into price history model,
+    while also saving to database
+    """
     t = get_token_kroger("product.compact")
     if not t:
         return None
@@ -119,7 +108,7 @@ def product_search(term, location_id):
 
     db_product, _ = Product.objects.get_or_create(
         product_id=product_id,
-        defaults={               # unit moved inside defaults — typo fixed
+        defaults={               
             "name": term,
             "unit": cheapest_unit or "",
         },
@@ -130,7 +119,6 @@ def product_search(term, location_id):
             product=db_product,
             store=store,
             price=cheapest_price,
-            # date removed — auto_now_add handles it
         )
         print(f"✓ Saved: {term} @ ${cheapest_price} ({cheapest_unit})")
     except Exception as e:

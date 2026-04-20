@@ -1,17 +1,14 @@
 from rest_framework import serializers
-from ..models import PriceHistory, Product, UserLocation, Store  # Make sure Store is imported
-
-class PriceHistorySerializer(serializers.ModelSerializer):
-    store = serializers.CharField(source = 'store.name')
-    location = serializers.CharField(source = 'store.location')
-    price = serializers.FloatField()
-
-    class Meta:
-        model = PriceHistory
-        fields = ['store', 'location', 'price']
+from api.serializers import PriceHistorySerializer
+from api.models import Product
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    """
+    Serializer for product model which includes all of the model atttributes for api ouutput.Also
+    includes a function to get current price from price history table, and function to get image
+    for product from cloud service
+    """
     price = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
 
@@ -28,20 +25,13 @@ class ProductSerializer(serializers.ModelSerializer):
             return  f"https://res.cloudinary.com/dkkbnt3ap/image/upload/{obj.image}"
         return None   
 
-class UserLocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserLocation
-        fields = "__all__"
-
-
-class StoreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Store
-        fields = ['id', 'store_id', 'name', 'location', 'latitude', 'longitude']
 
 
 class BarcodeLookupSerializer(serializers.ModelSerializer):
-    """Serializer specifically for barcode lookup with single store pricing"""
+    """
+    Serializer for barcode lookup which includes all of the model atttributes for api ouutput.
+    Also includes function to get price of item and store name.
+    """
     price = serializers.SerializerMethodField()
     store_name = serializers.SerializerMethodField()
     

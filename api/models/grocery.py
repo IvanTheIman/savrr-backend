@@ -3,6 +3,9 @@ from grocery_backend import settings
 
 
 class GroceryList(models.Model):
+    """
+    Model for user grocery list that includes, the owner(user), list name, time updated and created
+    """
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -17,6 +20,10 @@ class GroceryList(models.Model):
 
 
 class GroceryItem(models.Model):
+    """
+    Model for grocery item for user grocery list which includes, the grocery list, product, store, quantity
+    and is_checked for selection. Also includes subtotal function that adds pricing to grocery list
+    """
     grocery_list = models.ForeignKey(
         GroceryList,
         on_delete=models.CASCADE,

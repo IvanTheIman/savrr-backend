@@ -3,22 +3,15 @@ import requests
 
 
 class LocationService:
-    """Service for location and geocoding operations"""
+    """
+    function that attempts to connect to Zippo API to convert zipcode to approximate lat and lan
+    """
     
     GEOCODING_API_URL = 'https://api.zippopotam.us/us'
     TIMEOUT = 10
     
     @staticmethod
     def geocode_zipcode(zipcode):
-        """
-        Convert zipcode to lat/lng using Zippopotam API
-        
-        Args:
-            zipcode (str): US zipcode
-            
-        Returns:
-            dict: Result with success status and coordinates or error
-        """
         if not zipcode or not zipcode.strip():
             return {
                 'success': False,
@@ -30,7 +23,7 @@ class LocationService:
         
         try:
             url = f'{LocationService.GEOCODING_API_URL}/{zipcode}'
-            print(f'🗺️ Geocoding zipcode: {zipcode}')
+            print(f'Geocoding zipcode: {zipcode}')
             
             response = requests.get(url, timeout=LocationService.TIMEOUT)
             
@@ -43,7 +36,7 @@ class LocationService:
                     latitude = float(place['latitude'])
                     longitude = float(place['longitude'])
                     
-                    print(f'✅ Geocoded to: {latitude}, {longitude}')
+                    print(f'Geocoded to: {latitude}, {longitude}')
                     
                     return {
                         'success': True,
@@ -53,7 +46,7 @@ class LocationService:
                         'status_code': 200
                     }
                 else:
-                    print(f'❌ No results for zipcode: {zipcode}')
+                    print(f'No results for zipcode: {zipcode}')
                     return {
                         'success': False,
                         'error': 'Invalid zipcode',
@@ -61,14 +54,14 @@ class LocationService:
                     }
                     
             elif response.status_code == 404:
-                print(f'❌ Invalid zipcode: {zipcode}')
+                print(f'Invalid zipcode: {zipcode}')
                 return {
                     'success': False,
                     'error': 'Invalid zipcode',
                     'status_code': 404
                 }
             else:
-                print(f'⚠️ Geocoding API returned: {response.status_code}')
+                print(f'Geocoding API returned: {response.status_code}')
                 return {
                     'success': False,
                     'error': 'Geocoding service unavailable',
@@ -76,14 +69,14 @@ class LocationService:
                 }
                 
         except requests.exceptions.Timeout:
-            print('⏱️ Geocoding request timed out')
+            print('Geocoding request timed out')
             return {
                 'success': False,
                 'error': 'Geocoding request timed out',
                 'status_code': 504
             }
         except Exception as e:
-            print(f'❌ Geocoding error: {e}')
+            print(f'Geocoding error: {e}')
             return {
                 'success': False,
                 'error': 'Failed to geocode zipcode',

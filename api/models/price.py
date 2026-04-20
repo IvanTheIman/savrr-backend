@@ -2,6 +2,9 @@ from django.db import models
 
 
 class PriceHistory(models.Model):
+    """
+    Model for price history that includes, product, store, price and date
+    """
     product = models.ForeignKey('api.Product', on_delete=models.CASCADE)
     store = models.ForeignKey('api.Store', on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)

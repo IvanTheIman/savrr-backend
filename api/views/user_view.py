@@ -13,6 +13,10 @@ from api.models import UserProfile
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def location_view(request):
+    """
+    function that takes lat/lng from request, saves to user profile, and adds to query params for 
+    products_info view
+    """
     serializer = UserLocationSerializer(data = request.data)
 
     if serializer.is_valid():
@@ -32,6 +36,9 @@ def location_view(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
+    """
+    function that takes user registration data and creates new user
+    """
     serializer = RegisterSerializer(data=request.data)
 
     if serializer.is_valid():
@@ -48,9 +55,7 @@ def register_view(request):
 @permission_classes([AllowAny])
 def geocode_zipcode(request):
     """
-    Convert zipcode to lat/lng using Zippopotam API
-    POST /api/location/geocode/
-    Body: {"zipcode": "75701"}
+    funcion that converts zipcode to lat/lng using Zippopotam API
     """
     zipcode = request.data.get('zipcode')
     

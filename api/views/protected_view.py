@@ -5,4 +5,7 @@ from rest_framework.response import Response
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def protected_view(request):
+    """
+    Create a protected view that requires authentication
+    """
     return Response({'message': f'Hello, {request.user.username}'})

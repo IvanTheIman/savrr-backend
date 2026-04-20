@@ -1,6 +1,10 @@
 import random as r
 
 def randomizer(value, store):
+    """
+    function that takes value and uses store to determine how to skew the price, and formats price
+    to end in .*9
+    """
     std = .3
     skew = 1
     if store == 'brussels':
