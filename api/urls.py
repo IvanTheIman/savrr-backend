@@ -13,7 +13,6 @@ from api.views import (
     register_view,
     add_item,
     item_detail,
-    store_list,
     geocode_zipcode,
 )
 from api.views.grocery.products import products_info
@@ -39,7 +38,6 @@ urlpatterns = [
     path('grocery/<int:list_id>/items/<int:item_id>/', item_detail, name='item_detail'),
     
 
-    path('stores/', store_list, name='store_list'),
 
 
    
