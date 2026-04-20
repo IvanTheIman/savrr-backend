@@ -1,5 +1,3 @@
-# api/serializers/product_serializer.py
-
 from rest_framework import serializers
 from ..models import PriceHistory, Product, UserLocation, Store  # Make sure Store is imported
 
@@ -36,7 +34,6 @@ class UserLocationSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-# ADD THIS - StoreSerializer
 class StoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
