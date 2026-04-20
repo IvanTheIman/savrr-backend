@@ -19,6 +19,7 @@ __all__ = [
     'grocery_lists',
     'grocery_list_detail',  
     'add_item',
+    'store_list',
     'item_detail',
     'location_view',
     'register_view',

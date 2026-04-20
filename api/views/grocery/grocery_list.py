@@ -1,13 +1,14 @@
 from ast import Store
 
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from api.models import GroceryList
 from api.models.grocery import GroceryItem
 from api.models.product import Product
 from api.serializers.grocery_serializer import GroceryItemSerializer, GroceryListSerializer
+from api.serializers.store_serializer import StoreSerializer
 
 
 @api_view(['GET', 'POST'])
@@ -129,3 +130,14 @@ def item_detail(request, list_id, item_id):
     if request.method == 'DELETE':
         item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def store_list(request):
+    """
+    Get all stores
+    GET /api/stores/
+    """
+    stores = Store.objects.all()
+    serializer = StoreSerializer(stores, many=True)
+    return Response(serializer.data)
