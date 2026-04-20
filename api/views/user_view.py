@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
-from api.serializers.product_serializer import UserLocationSerializer
+from api.serializers.user_serializer import UserLocationSerializer
 from api.serializers.user_serializer import RegisterSerializer
 from api.services.location.geocode import LocationService  
 from .grocery.products import products_info
