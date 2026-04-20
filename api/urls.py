@@ -1,13 +1,18 @@
 from django.urls import path
 from django.contrib import admin
 from api.services.barcode.barcode_lookup import lookup_barcode
-from api.views.barcode.barcode_lookup_view import barcode_lookup_view
-from api.views.grocery.grocery_list import  grocery_lists
-from .views.grocery.products import products_info
-from .views.user_view import location_view, register_view, geocode_zipcode
+from api.views import (
+    barcode_lookup_view,
+    grocery_lists,
+    location_view,
+    register_view,
+    geocode_zipcode,
+)
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
+
+from api.views.grocery.products import products_info
 
 urlpatterns = [
     path('admin/', admin.site.urls),
