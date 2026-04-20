@@ -26,4 +26,4 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductBarcode, ProductBarcodeAdmin)
 admin.site.register(Store)
 admin.site.register(PriceHistory)
-# ... register your other models
+

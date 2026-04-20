@@ -7,7 +7,7 @@ from django.db.models import Q
 
 from api.models import Product, ProductBarcode, Store
 from api.serializers.product_serializer import BarcodeLookupSerializer
-from api.services.barcode_fetch import OpenFoodFactsService
+from api.services.barcode.barcode_fetch import OpenFoodFactsService
 
 
 @api_view(['GET'])

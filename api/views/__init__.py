@@ -1,1 +1,1 @@
-from .products import products_info
+from .grocery.products import products_info

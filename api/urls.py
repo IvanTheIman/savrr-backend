@@ -1,10 +1,10 @@
 from django.urls import include, path
 from django.contrib import admin
 
-from api.services.barcode import lookup_barcode
+from api.services.barcode.barcode_lookup import lookup_barcode
 from api.views.barcode.barcode_lookup_view import barcode_lookup_view
-from api.views.grocery_list import  grocery_lists, store_list
-from .views.products import products_info
+from api.views.grocery.grocery_list import  grocery_lists, store_list
+from .views.grocery.products import products_info
 from .views.user_view import location_view, register_view, geocode_zipcode
 from django.conf import settings
 from django.conf.urls.static import static

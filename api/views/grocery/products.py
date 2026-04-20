@@ -5,7 +5,7 @@ from rest_framework import status
 from api.models import PriceHistory, Product, Store
 from api.serializers.product_serializer import ProductSerializer
 from django.db.models import Prefetch, OuterRef, Subquery, Min
-from api.services.google_maps import distance
+from api.services.location.google_maps import distance
 
 
 @api_view(['GET'])
