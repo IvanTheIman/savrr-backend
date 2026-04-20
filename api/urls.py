@@ -3,7 +3,7 @@ from django.contrib import admin
 
 from api.services.barcode.barcode_lookup import lookup_barcode
 from api.views.barcode.barcode_lookup_view import barcode_lookup_view
-from api.views.grocery.grocery_list import  grocery_lists, store_list
+from api.views.grocery.grocery_list import  grocery_lists
 from .views.grocery.products import products_info
 from .views.user_view import location_view, register_view, geocode_zipcode
 from django.conf import settings
@@ -24,8 +24,6 @@ urlpatterns = [
     path('products/barcode/', lookup_barcode),
 
     path('grocery/', grocery_lists),
-
-    path('stores/', store_list),
 
     path('products/barcode/<str:barcode>/', barcode_lookup_view, name='barcode-lookup'),
 
