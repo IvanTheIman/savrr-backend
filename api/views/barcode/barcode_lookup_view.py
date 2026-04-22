@@ -1,4 +1,3 @@
-
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response 
@@ -8,6 +7,21 @@ from django.db.models import Q
 from api.models import Product, ProductBarcode, Store
 from api.serializers.product_serializer import BarcodeLookupSerializer
 from api.services.barcode.barcode_fetch import OpenFoodFactsService
+
+
+# Hardcoded barcode mappings - Map barcodes to existing product names in your database
+HARDCODED_BARCODES = {
+    '4011': {
+        'name': 'Banana',  # Make sure you have a product named "Banana" in your database
+        'variant_name': 'Banana (PLU 4011)',
+        'source': 'hardcoded'
+    },
+    '4016': {
+        'name': 'Apple',  # Make sure you have a product named "Apple" in your database
+        'variant_name': 'Red Delicious Apple (PLU 4016)',
+        'source': 'hardcoded'
+    },
+}
 
 
 @api_view(['GET'])
@@ -44,13 +58,54 @@ def barcode_lookup_view(request, barcode):
         })
         
     except ProductBarcode.DoesNotExist:
-        # Step 2: Barcode not found - try Open Food Facts
-        print(f"Barcode {barcode} not found in database. Checking Open Food Facts...")
+        # Step 2: Check hardcoded barcodes BEFORE hitting external API
+        if barcode in HARDCODED_BARCODES:
+            print(f"🔒 Found hardcoded barcode: {barcode}")
+            
+            hardcoded_data = HARDCODED_BARCODES[barcode]
+            product_name = hardcoded_data['name']
+            
+            # Try to find existing product with matching name
+            existing_product = Product.objects.filter(
+                Q(name__iexact=product_name)
+            ).first()
+            
+            if existing_product:
+                # Match found - link barcode to existing product
+                print(f"✅ Linked hardcoded barcode {barcode} to product: {existing_product.name}")
+                
+                ProductBarcode.objects.create(
+                    product=existing_product,
+                    barcode=barcode,
+                    variant_name=hardcoded_data.get('variant_name', product_name),
+                    source=hardcoded_data.get('source', 'hardcoded')
+                )
+                
+                serializer = BarcodeLookupSerializer(existing_product, context={'store': store})
+                
+                return Response({
+                    'success': True,
+                    'supported': True,
+                    'product': serializer.data,
+                    'source': 'hardcoded',
+                    'message': 'Hardcoded barcode linked to product'
+                })
+            else:
+                # Product doesn't exist in database
+                return Response({
+                    'success': True,
+                    'supported': False,
+                    'message': f'Product "{product_name}" not found in database. Please add it first.',
+                    'barcode': barcode
+                }, status=status.HTTP_200_OK)
+        
+        # Step 3: Barcode not hardcoded - try Open Food Facts
+        print(f"Barcode {barcode} not found in database or hardcoded list. Checking Open Food Facts...")
         
         external_data = OpenFoodFactsService.fetch_product(barcode)
         
         if external_data:
-            # Step 3: Found in Open Food Facts - try to match EXISTING product only
+            # Step 4: Found in Open Food Facts - try to match EXISTING product only
             product_name = external_data['name']
             
             # Try to find existing product with similar name
@@ -90,7 +145,7 @@ def barcode_lookup_view(request, barcode):
                     'barcode': barcode
                 }, status=status.HTTP_200_OK)
         else:
-            # Step 4: Not found in Open Food Facts either
+            # Step 5: Not found in Open Food Facts either
             print(f"❌ Barcode {barcode} not found in Open Food Facts")
             
             return Response({
