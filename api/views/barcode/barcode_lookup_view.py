@@ -12,12 +12,12 @@ from api.services.barcode.barcode_fetch import OpenFoodFactsService
 # Hardcoded barcode mappings - Map barcodes to existing product names in your database
 HARDCODED_BARCODES = {
     '4011': {
-        'name': 'Banana',  # Make sure you have a product named "Banana" in your database
+        'name': 'bananas',  # Make sure you have a product named "Banana" in your database
         'variant_name': 'Banana (PLU 4011)',
         'source': 'hardcoded'
     },
     '4016': {
-        'name': 'Apple',  # Make sure you have a product named "Apple" in your database
+        'name': 'red delicious apple',  # Make sure you have a product named "Apple" in your database
         'variant_name': 'Red Delicious Apple (PLU 4016)',
         'source': 'hardcoded'
     },
