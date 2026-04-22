@@ -17,8 +17,8 @@ HARDCODED_BARCODES = {
         'source': 'hardcoded'
     },
     '4016': {
-        'name': 'red delicious apple',  
-        'variant_name': 'red delicious apple (PLU 4016)',
+        'name': 'red delicious apples',  
+        'variant_name': 'red delicious apples (PLU 4016)',
         'source': 'hardcoded'
     },
     '4012': {
